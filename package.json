@@ -1,20 +1,20 @@
 {
-  "name": "@finsweet/developer-starter",
+  "name": "@bloomcodeofficial/intebarapost",
   "version": "0.0.0",
   "description": "Developer starter template for Finsweet projects.",
-  "homepage": "https://github.com/finsweet/developer-starter#readme",
+  "homepage": "https://github.com/bloomcodeofficial/intebarapost#readme",
   "license": "ISC",
   "keywords": [],
   "author": {
-    "name": "Finsweet",
-    "url": "https://finsweet.com/"
+    "name": "Bloomweb",
+    "url": "https://bloomweb.se"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/finsweet/developer-starter.git"
+    "url": "git+https://github.com/bloomcodeofficial/intebarapost.git"
   },
   "bugs": {
-    "url": "https://github.com/finsweet/developer-starter/issues"
+    "url": "https://github.com/bloomcodeofficial/intebarapost/issues"
   },
   "type": "module",
   "main": "src/index.ts",
@@ -52,6 +52,7 @@
     "typescript": "^5.0.3"
   },
   "dependencies": {
-    "@finsweet/ts-utils": "^0.39.1"
+    "@finsweet/ts-utils": "^0.39.1",
+    "gsap": "^3.11.5"
   }
 }
