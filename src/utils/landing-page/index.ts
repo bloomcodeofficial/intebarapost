@@ -153,7 +153,7 @@ export const js = () => {
       });
 
       gsap.to(infoBtnPhone, {
-        text: '08-505 255 40',
+        text: '08-505 255 00',
         ease: 'ease',
         duration: 0.1,
       });
