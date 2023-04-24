@@ -79,9 +79,8 @@ export const js = () => {
             duration: 0.1,
           }
         );
+        popup.style.display = 'none';
       }
-      document.body.style.overflow = '';
-      document.body.style.paddingRight = '';
     });
   });
 
