@@ -147,7 +147,7 @@ export const js = () => {
       });
 
       gsap.to(infoBtnEmail, {
-        text: 'ORDER@INTEBARAPOST.SE',
+        text: 'BUD@INTEBARAPOST.SE',
         ease: 'ease',
         duration: 0.1,
       });
