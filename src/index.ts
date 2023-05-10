@@ -1,7 +1,9 @@
 import { greetUser } from '$utils/greet';
-import { js } from '$utils/landing-page/index';
+import { intebarapost } from '$utils/landing-page/index';
+import { tracking } from '$utils/landing-page/tracking/tracking';
 
 window.Webflow ||= [];
 window.Webflow.push(() => {
-  js();
+  intebarapost();
+  tracking();
 });

@@ -2,7 +2,7 @@ import { gsap } from 'gsap';
 import { Flip } from 'gsap/Flip';
 import { TextPlugin } from 'gsap/TextPlugin';
 
-export const js = () => {
+export const intebarapost = () => {
   gsap.registerPlugin(Flip, TextPlugin);
 
   // ELEMENTS //
