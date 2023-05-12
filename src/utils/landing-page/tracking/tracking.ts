@@ -52,6 +52,7 @@ export const tracking = function () {
           errorHandling(
             'Ingen information tillgänglig: Tyvärr kunde ingen information hittas för det spårnings-ID du har angett. Var vänlig försök igen senare.'
           );
+          return;
         }
 
         // Populate UI elements
