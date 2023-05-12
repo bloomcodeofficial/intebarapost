@@ -5906,18 +5906,6 @@
     simulateEvent(field, ["input", "change"].filter((eventKey) => !omitEvents.includes(eventKey)));
   };
 
-  // node_modules/.pnpm/@finsweet+ts-utils@0.39.1/node_modules/@finsweet/ts-utils/dist/helpers/getFormFieldValue.js
-  var getFormFieldValue = (input) => {
-    let { value } = input;
-    if (input.type === "checkbox")
-      value = input.checked.toString();
-    if (input.type === "radio") {
-      const checkedOption = input.closest("form")?.querySelector(`input[name="${input.name}"]:checked`);
-      value = isHTMLInputElement(checkedOption) ? checkedOption.value : "";
-    }
-    return value.toString();
-  };
-
   // src/utils/landing-page/tracking/tracking.ts
   var tracking = function() {
     const form = document.querySelector('[data-element="form"]');
@@ -5929,12 +5917,12 @@
     const carrier = document.querySelector('[data-element="carrier"]');
     const latestCheckpoint = document.querySelector('[data-element="latest-status"]');
     let trackingObj;
-    submitBtn?.addEventListener("click", () => {
-      const input = form.querySelector('[name="Tracking-ID"]');
-      if (getFormFieldValue(input)) {
-        startTracker(getFormFieldValue(input));
-        clearFormField(input);
-      }
+    form?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const formData = Object.fromEntries(new FormData(e.target).entries());
+      const input = form.querySelector('[name="trackingID"]');
+      startTracker(formData.trackingID);
+      clearFormField(input);
     });
     const startTracker = function(providedID) {
       container?.classList.remove("tracking_container--error");
@@ -5948,13 +5936,18 @@
           const [listInstance] = listInstances;
           const [item] = listInstance.items;
           const itemTemplateElement = item.element;
-          const trackings = await fetchTracking(providedID);
-          if (!trackings)
+          const tracking2 = await fetchTracking(providedID);
+          if (!tracking2.trackData)
             return;
+          const checkpoints = tracking2.trackData.data.items[0].origin_info.trackinfo;
+          const mainStatus2 = uppercaseFirstLetter(tracking2.trackData.data.items[0].status);
+          const carrier2 = tracking2.carrier.name;
+          const id2 = tracking2.trackData.data.items[0].tracking_number;
+          const latestCheckpoint2 = tracking2.trackData.data.items[0].lastEvent;
           listInstance.clearItems();
-          const newItems = trackings.map((tracking2) => newItem(tracking2, itemTemplateElement));
+          const newItems = checkpoints.map((checkpoint) => newItem(checkpoint, itemTemplateElement));
           await listInstance.addItems(newItems);
-          successHandling();
+          trackingReceived(mainStatus2, id2, carrier2, latestCheckpoint2);
         }
       ]);
       const fetchTracking = async (trackingID) => {
@@ -5970,9 +5963,7 @@
           if (!tracking2.trackData) {
             errorHandling(tracking2.message);
           }
-          const trackingEvents = tracking2.trackData.data.items[0].origin_info.trackinfo;
-          trackingObj = tracking2;
-          return trackingEvents;
+          return tracking2;
         } catch (error) {
         }
       };
@@ -5981,17 +5972,17 @@
         container?.classList.add("tracking_container--error");
         errorMessageEl.textContent = errorMessage;
       };
-      const successHandling = () => {
+      const trackingReceived = (mainStatusText, idText, carrierText, latestCheckpointText) => {
         container?.classList.remove("tracking_container--init");
         container?.classList.add("tracking_container--success");
-        mainStatus?.classList.add("tracking_status-text--success");
-        mainStatus.textContent = uppercaseFirstLetter(trackingObj.trackData.data.items[0].status);
-        carrier.textContent = trackingObj.carrier.name;
-        id.textContent = trackingObj.trackData.data.items[0].tracking_number;
-        latestCheckpoint.textContent = trackingObj.trackData.data.items[0].lastEvent;
+        mainStatus.textContent = uppercaseFirstLetter(mainStatusText);
+        id.textContent = idText;
+        carrier.textContent = carrierText;
+        latestCheckpoint.textContent = latestCheckpointText;
       };
       const uppercaseFirstLetter = (word) => {
-        const final = `${word}`.charAt(0).toUpperCase() + `${word}`.slice(1);
+        const lowercaseAll = word.toLowerCase();
+        const final = lowercaseAll.charAt(0).toUpperCase() + lowercaseAll.slice(1);
         return final;
       };
       const newItem = (tracking2, templateElement) => {
@@ -6017,8 +6008,8 @@
   // src/index.ts
   window.Webflow ||= [];
   window.Webflow.push(() => {
-    intebarapost();
     tracking();
+    intebarapost();
   });
 })();
 /*! Bundled license information:

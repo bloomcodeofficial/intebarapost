@@ -1,7 +1,5 @@
-import { clearFormField, getFormFieldValue } from '@finsweet/ts-utils';
+import { clearFormField } from '@finsweet/ts-utils';
 import type { CMSList } from 'src/types/CMSList';
-
-import type { Tracking } from './types';
 
 export const tracking = function () {
   const form = document.querySelector<HTMLFormElement>('[data-element="form"]');
@@ -15,12 +13,17 @@ export const tracking = function () {
 
   let trackingObj;
 
-  submitBtn?.addEventListener('click', () => {
-    const input = form.querySelector('[name="Tracking-ID"]');
-    if (getFormFieldValue(input)) {
-      startTracker(getFormFieldValue(input));
-      clearFormField(input);
-    }
+  // Prevent form from submitting and return Tracking ID
+  form?.addEventListener('submit', (e) => {
+    // Prevent form from submitting
+    e.preventDefault();
+
+    // Get form data object
+    const formData = Object.fromEntries(new FormData(e.target).entries());
+    const input = form.querySelector('[name="trackingID"]');
+    // Triggers tracker with tracking ID from form data object
+    startTracker(formData.trackingID);
+    clearFormField(input);
   });
 
   const startTracker = function (providedID) {
@@ -40,24 +43,33 @@ export const tracking = function () {
         const itemTemplateElement = item.element;
 
         // Fetch external data
-        const trackings = await fetchTracking(providedID);
-        if (!trackings) return;
+        const tracking = await fetchTracking(providedID);
+        if (!tracking.trackData) return;
+
+        // Array of checkpoints from the tracking object
+        const checkpoints = tracking.trackData.data.items[0].origin_info.trackinfo;
+
+        // Populate UI elements
+        const mainStatus = uppercaseFirstLetter(tracking.trackData.data.items[0].status);
+        const carrier = tracking.carrier.name;
+        const id = tracking.trackData.data.items[0].tracking_number;
+        const latestCheckpoint = tracking.trackData.data.items[0].lastEvent;
 
         // Remove the placeholder items
         listInstance.clearItems();
 
         // Create the items from the extenal data
-        const newItems = trackings.map((tracking) => newItem(tracking, itemTemplateElement));
+        const newItems = checkpoints.map((checkpoint) => newItem(checkpoint, itemTemplateElement));
 
         // Feed the new items into the CMSList
         await listInstance.addItems(newItems);
 
-        // Success
-        successHandling();
+        // Tracking object received successfully
+        trackingReceived(mainStatus, id, carrier, latestCheckpoint);
       },
     ]);
 
-    const fetchTracking = async (trackingID): Promise<Tracking[]> => {
+    const fetchTracking = async (trackingID) => {
       try {
         const response = await fetch('https://intebarapost.onrender.com/api/track', {
           method: 'POST',
@@ -66,15 +78,14 @@ export const tracking = function () {
           },
           body: JSON.stringify({ number: trackingID }),
         });
+
         const tracking = await response.json();
+
         if (!tracking.trackData) {
           errorHandling(tracking.message);
         }
 
-        const trackingEvents: Tracking[] = tracking.trackData.data.items[0].origin_info.trackinfo;
-        trackingObj = tracking;
-
-        return trackingEvents;
+        return tracking;
       } catch (error) {}
     };
 
@@ -84,19 +95,23 @@ export const tracking = function () {
       errorMessageEl.textContent = errorMessage;
     };
 
-    const successHandling = () => {
+    const trackingReceived = (mainStatusText, idText, carrierText, latestCheckpointText) => {
+      // Remove loading UI and show tracking
       container?.classList.remove('tracking_container--init');
       container?.classList.add('tracking_container--success');
-      mainStatus?.classList.add('tracking_status-text--success');
+      //mainStatus?.classList.add('tracking_status-text--success');
 
-      mainStatus.textContent = uppercaseFirstLetter(trackingObj.trackData.data.items[0].status);
-      carrier.textContent = trackingObj.carrier.name;
-      id.textContent = trackingObj.trackData.data.items[0].tracking_number;
-      latestCheckpoint.textContent = trackingObj.trackData.data.items[0].lastEvent;
+      // Change text of elements
+      mainStatus.textContent = uppercaseFirstLetter(mainStatusText);
+      id.textContent = idText;
+      carrier.textContent = carrierText;
+      latestCheckpoint.textContent = latestCheckpointText;
     };
 
+    // Takes word and returns first letter uppercased
     const uppercaseFirstLetter = (word) => {
-      const final = `${word}`.charAt(0).toUpperCase() + `${word}`.slice(1);
+      const lowercaseAll = word.toLowerCase();
+      const final = lowercaseAll.charAt(0).toUpperCase() + lowercaseAll.slice(1);
       return final;
     };
 
@@ -105,11 +120,11 @@ export const tracking = function () {
       const newItem = templateElement.cloneNode(true) as HTMLDivElement;
 
       // Query the internal element of the item
-      const date = newItem.querySelector<HTMLParagraphElement>('[data-element="date"]');
-      const status = newItem.querySelector<HTMLParagraphElement>('[data-element="status"]');
-      const time = newItem.querySelector<HTMLParagraphElement>('[data-element="time"]');
-      const location = newItem.querySelector<HTMLParagraphElement>('[data-element="location"]');
-      const checkpoint = newItem.querySelector<HTMLParagraphElement>('[data-element="piece-id"]');
+      const date = newItem.querySelector('[data-element="date"]');
+      const status = newItem.querySelector('[data-element="status"]');
+      const time = newItem.querySelector('[data-element="time"]');
+      const location = newItem.querySelector('[data-element="location"]');
+      const checkpoint = newItem.querySelector('[data-element="piece-id"]');
 
       // Populate the internal items
       if (status) status.textContent = tracking.StatusDescription;
