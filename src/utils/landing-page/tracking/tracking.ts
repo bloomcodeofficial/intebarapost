@@ -48,6 +48,11 @@ export const tracking = function () {
 
         // Array of checkpoints from the tracking object
         const checkpoints = tracking.trackData.data.items[0].origin_info.trackinfo;
+        if (!checkpoints) {
+          errorHandling(
+            'Ingen information tillgänglig: Tyvärr kunde ingen information hittas för det spårnings-ID du har angett. Var vänlig försök igen senare.'
+          );
+        }
 
         // Populate UI elements
         const mainStatus = uppercaseFirstLetter(tracking.trackData.data.items[0].status);
@@ -115,7 +120,7 @@ export const tracking = function () {
       return final;
     };
 
-    const newItem = (tracking: Tracking, templateElement: HTMLDivElement) => {
+    const newItem = (tracking, templateElement: HTMLDivElement) => {
       // Clone the template element
       const newItem = templateElement.cloneNode(true) as HTMLDivElement;
 
