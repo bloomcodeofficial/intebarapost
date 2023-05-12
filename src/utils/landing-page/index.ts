@@ -49,11 +49,10 @@ export const intebarapost = () => {
 
   linksContainer?.addEventListener('click', (e) => {
     const target = e.target.closest('.main_link');
-    const link = target.getAttribute('href');
     if (!target) return;
+    const link = target.getAttribute('href');
 
     e.preventDefault();
-
     startLoader();
 
     setTimeout(() => {

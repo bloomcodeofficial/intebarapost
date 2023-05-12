@@ -3,7 +3,6 @@ import type { CMSList } from 'src/types/CMSList';
 
 export const tracking = function () {
   const form = document.querySelector<HTMLFormElement>('[data-element="form"]');
-  const submitBtn = form?.querySelector('.button');
   const container = document.querySelector('.tracking_container');
   const errorMessageEl = document.querySelector('[data-element="error-message"]');
   const mainStatus = document.querySelector('[data-element="main-status"]');
@@ -105,7 +104,9 @@ export const tracking = function () {
       // Remove loading UI and show tracking
       container?.classList.remove('tracking_container--init');
       container?.classList.add('tracking_container--success');
-      //mainStatus?.classList.add('tracking_status-text--success');
+      if (mainStatusText === 'Delivered') {
+        mainStatus?.classList.add('tracking_status-text--success');
+      }
 
       // Change text of elements
       mainStatus.textContent = uppercaseFirstLetter(mainStatusText);
